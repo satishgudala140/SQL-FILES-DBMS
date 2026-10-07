@@ -1,0 +1,167 @@
+CREATE DATABASE OnlineShopping;
+USE OnlineShopping;
+
+CREATE TABLE Customer (
+    Customer_ID INT PRIMARY KEY,
+    Customer_Name VARCHAR(50),
+    Email VARCHAR(100),
+    Phone VARCHAR(15),
+    City VARCHAR(50)
+);
+
+CREATE TABLE Product (
+    Product_ID INT PRIMARY KEY,
+    Product_Name VARCHAR(100),
+    Category VARCHAR(50),
+    Price DECIMAL(10,2),
+    Stock INT
+);
+
+CREATE TABLE Orders (
+    Order_ID INT PRIMARY KEY,
+    Customer_ID INT,
+    Order_Date DATE,
+    Total_Amount DECIMAL(10,2),
+    FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID)
+);
+
+CREATE TABLE Order_Item (
+    Order_Item_ID INT PRIMARY KEY,
+    Order_ID INT,
+    Product_ID INT,
+    Quantity INT,
+    Price DECIMAL(10,2),
+    FOREIGN KEY (Order_ID) REFERENCES Orders(Order_ID),
+    FOREIGN KEY (Product_ID) REFERENCES Product(Product_ID)
+);
+
+CREATE TABLE Payment (
+    Payment_ID INT PRIMARY KEY,
+    Order_ID INT,
+    Payment_Date DATE,
+    Payment_Method VARCHAR(30),
+    Payment_Status VARCHAR(20),
+    FOREIGN KEY (Order_ID) REFERENCES Orders(Order_ID)
+);
+
+INSERT INTO Customer VALUES
+(1, 'Rahul', 'rahul@gmail.com', '9876543210', 'Hyderabad'),
+(2, 'Priya', 'priya@gmail.com', '9876543211', 'Vijayawada'),
+(3, 'Arjun', 'arjun@gmail.com', '9876543212', 'Visakhapatnam'),
+(4, 'Sneha', 'sneha@gmail.com', '9876543213', 'Rajahmundry');
+
+INSERT INTO Product VALUES
+(101, 'Laptop', 'Electronics', 55000, 10),
+(102, 'Smartphone', 'Electronics', 25000, 20),
+(103, 'Headphones', 'Accessories', 2000, 50),
+(104, 'Keyboard', 'Accessories', 1500, 30),
+(105, 'Shoes', 'Fashion', 3000, 25);
+
+INSERT INTO Orders VALUES
+(1001, 1, '2026-10-01', 57000),
+(1002, 2, '2026-10-02', 25000),
+(1003, 3, '2026-10-03', 5000),
+(1004, 1, '2026-10-04', 3000);
+
+INSERT INTO Order_Item VALUES
+(1, 1001, 101, 1, 55000),
+(2, 1001, 103, 1, 2000),
+(3, 1002, 102, 1, 25000),
+(4, 1003, 103, 1, 2000),
+(5, 1003, 104, 2, 1500),
+(6, 1004, 105, 1, 3000);
+
+INSERT INTO Payment VALUES
+(501, 1001, '2026-10-01', 'UPI', 'Paid'),
+(502, 1002, '2026-10-02', 'Credit Card', 'Paid'),
+(503, 1003, '2026-10-03', 'Cash on Delivery', 'Pending'),
+(504, 1004, '2026-10-04', 'UPI', 'Paid');
+
+-- Display all customers
+SELECT * FROM Customer;
+
+-- Display all products
+SELECT * FROM Product;
+
+-- Display products costing more than 5000
+SELECT * FROM Product
+WHERE Price > 5000;
+
+-- Display products in Electronics category
+SELECT * FROM Product
+WHERE Category = 'Electronics';
+
+-- Display customer orders
+SELECT * FROM Orders;
+
+-- Display customers along with their orders
+SELECT 
+    Customer.Customer_Name,
+    Orders.Order_ID,
+    Orders.Order_Date,
+    Orders.Total_Amount
+FROM Customer
+JOIN Orders
+ON Customer.Customer_ID = Orders.Customer_ID;
+
+-- Display order details with product names
+SELECT
+    Orders.Order_ID,
+    Product.Product_Name,
+    Order_Item.Quantity,
+    Order_Item.Price
+FROM Orders
+JOIN Order_Item
+ON Orders.Order_ID = Order_Item.Order_ID
+JOIN Product
+ON Order_Item.Product_ID = Product.Product_ID;
+
+-- Find the total number of products
+SELECT COUNT(*) AS Total_Products
+FROM Product;
+
+-- Find the average product price
+SELECT AVG(Price) AS Average_Price
+FROM Product;
+
+-- Find the most expensive product
+SELECT MAX(Price) AS Highest_Price
+FROM Product;
+
+-- Find total sales
+SELECT SUM(Total_Amount) AS Total_Sales
+FROM Orders;
+
+-- Update product stock
+UPDATE Product
+SET Stock = Stock - 1
+WHERE Product_ID = 101;
+
+-- Change customer city
+UPDATE Customer
+SET City = 'Kakinada'
+WHERE Customer_ID = 1;
+
+-- Display paid payments
+SELECT * FROM Payment
+WHERE Payment_Status = 'Paid';
+
+-- Create a view for order details
+CREATE VIEW Order_Details AS
+SELECT
+    Orders.Order_ID,
+    Customer.Customer_Name,
+    Product.Product_Name,
+    Order_Item.Quantity,
+    Order_Item.Price,
+    Orders.Order_Date
+FROM Orders
+JOIN Customer
+ON Orders.Customer_ID = Customer.Customer_ID
+JOIN Order_Item
+ON Orders.Order_ID = Order_Item.Order_ID
+JOIN Product
+ON Order_Item.Product_ID = Product.Product_ID;
+
+-- Display the view
+SELECT * FROM Order_Details;
